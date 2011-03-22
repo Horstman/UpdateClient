@@ -209,13 +209,13 @@ public class StandaloneUpdaterGui implements UpdaterListener {
                 @Override
                 protected void runInEDT() {
                     StandaloneUpdaterGui.this.btn1.addActionListener(new ActionListener() {
-                        
+
                         @Override
                         public void actionPerformed(final ActionEvent e) {
                             // TODO Auto-generated method stub
-                            
+
                         }
-                    })
+                    });
                     StandaloneUpdaterGui.this.btn2.setEnabled(true);
                     StandaloneUpdaterGui.this.btn1.setEnabled(true);
 
