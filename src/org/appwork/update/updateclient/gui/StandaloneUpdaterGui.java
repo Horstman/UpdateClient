@@ -39,21 +39,22 @@ import org.appwork.utils.swing.dialog.DialogClosedException;
 
 public class StandaloneUpdaterGui implements UpdaterListener {
 
-    private final JFrame   frame;
-    private final Storage  storage;
-    private final Updater  updateController;
+    private final JFrame         frame;
+    private final Storage        storage;
+    private final Updater        updateController;
 
-    private UpdaterCoreGui coreGUI;
-    private JLabel         branchLabel;
-    private JButton        btn1;
-    private JButton        btn2;
-    private JPanel         btnBar;
+    private UpdaterCoreGui       coreGUI;
+    private JLabel               branchLabel;
+    private JButton              btn1;
+    private JButton              btn2;
+    private JPanel               btnBar;
+    private final ActionListener startAction;
 
-    public StandaloneUpdaterGui(final Updater updateController) {
+    public StandaloneUpdaterGui(final Updater updateController, final ActionListener startAction) {
 
         this.updateController = updateController;
         this.setLaf();
-
+        this.startAction = startAction;
         this.storage = JSonStorage.getPlainStorage(updateController.getAppID() + "_WebUpdaterGUI");
 
         this.frame = new JFrame(updateController.getAppID() + " Updater");
@@ -183,6 +184,15 @@ public class StandaloneUpdaterGui implements UpdaterListener {
         this.btn1.setEnabled(false);
         this.btn2.setToolTipText(T._.please_wait_until_update_finished());
         this.btn1.setToolTipText(T._.please_wait_until_update_finished());
+        StandaloneUpdaterGui.this.btn1.addActionListener(this.startAction);
+        this.btn2.addActionListener(new ActionListener() {
+
+            @Override
+            public void actionPerformed(final ActionEvent e) {
+                StandaloneUpdaterGui.this.cancel();
+            }
+
+        });
         this.frame.add(new JSeparator(), "pushx,growx,gaptop 5");
         this.frame.add(this.branchLabel, "alignx right,gapbottom 5,gapright 5,height 16!");
 
@@ -208,14 +218,7 @@ public class StandaloneUpdaterGui implements UpdaterListener {
 
                 @Override
                 protected void runInEDT() {
-                    StandaloneUpdaterGui.this.btn1.addActionListener(new ActionListener() {
 
-                        @Override
-                        public void actionPerformed(final ActionEvent e) {
-                            // TODO Auto-generated method stub
-
-                        }
-                    });
                     StandaloneUpdaterGui.this.btn2.setEnabled(true);
                     StandaloneUpdaterGui.this.btn1.setEnabled(true);
 
