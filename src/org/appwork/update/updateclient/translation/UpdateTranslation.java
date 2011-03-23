@@ -97,7 +97,7 @@ public interface UpdateTranslation extends TranslateInterface {
     @Default(lngs = { "en", "de" }, values = { "Close Main Application", "Hauptanwendung beenden" })
     String locked_dialog_title();
 
-    @Default(lngs = { "en", "de" }, values = { "Jobs to do: Download %s2 file(s), install %s1 file(s) & remove %s3 oudated file(s)", "Zu erledigen: %s2 Datei(en) herunterladen, %s1 Datei(en) installieren & %s3 alte Datei(en) entfernen." })
+    @Default(lngs = { "en", "de" }, values = { "Found: %s2 file(s) to download, %s1 file(s) to install & %s3 oudated file(s)", "Gefunden: %s2 Datei(en) herunterladen, %s1 Datei(en) installieren & %s3 alte Datei(en) entfernen." })
     String log_x_files_to_update_found(int uninstalled, int updates, int remove);
 
     @Default(lngs = { "en", "de" }, values = { "You already run the latest Version", "Sie haben bereits die neuste Version" })
