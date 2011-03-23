@@ -2,14 +2,11 @@ package org.appwork.update.updateclient.gui;
 
 import java.awt.Dimension;
 import java.awt.Frame;
-import java.awt.Image;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
-import java.io.IOException;
-import java.util.ArrayList;
 
 import javax.swing.Box;
 import javax.swing.JButton;
@@ -30,12 +27,12 @@ import org.appwork.update.updateclient.UpdaterState;
 import org.appwork.update.updateclient.event.UpdaterEvent;
 import org.appwork.update.updateclient.event.UpdaterListener;
 import org.appwork.update.updateclient.translation.T;
-import org.appwork.utils.ImageProvider.ImageProvider;
 import org.appwork.utils.net.HTTPException;
 import org.appwork.utils.swing.EDTRunner;
 import org.appwork.utils.swing.dialog.Dialog;
 import org.appwork.utils.swing.dialog.DialogCanceledException;
 import org.appwork.utils.swing.dialog.DialogClosedException;
+import org.appwork.utils.swing.windowflasher.WindowFlasher;
 
 public class StandaloneUpdaterGui implements UpdaterListener {
 
@@ -49,6 +46,7 @@ public class StandaloneUpdaterGui implements UpdaterListener {
     private JButton              btn2;
     private JPanel               btnBar;
     private final ActionListener startAction;
+    private WindowFlasher        flasher;
 
     public StandaloneUpdaterGui(final Updater updateController, final ActionListener startAction) {
 
@@ -88,15 +86,7 @@ public class StandaloneUpdaterGui implements UpdaterListener {
 
         this.frame.setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
         // set appicon
-        final ArrayList<Image> list = new ArrayList<Image>();
 
-        try {
-            list.add(ImageProvider.getBufferedImage("icon", true));
-
-            this.frame.setIconImages(list);
-        } catch (final IOException e) {
-            e.printStackTrace();
-        }
         // Set Application dimensions and locations
 
         final Dimension dim = new Dimension(this.storage.get("DIMENSION_WIDTH", 300), this.storage.get("DIMENSION_HEIGHT", 60));
@@ -115,8 +105,6 @@ public class StandaloneUpdaterGui implements UpdaterListener {
 
         this.frame.setLocation(this.storage.get("LOCATION_X", x), this.storage.get("LOCATION_Y", y));
 
-        this.frame.setVisible(true);
-
         this.frame.pack();
 
     }
@@ -126,6 +114,7 @@ public class StandaloneUpdaterGui implements UpdaterListener {
         if (this.updateController.isInterrupted() || this.updateController.hasPassed(this.updateController.stateDone) || this.updateController.hasPassed(this.updateController.stateError)) {
             this.frame.dispose();
             System.exit(0);
+            return;
         }
         try {
             Dialog.getInstance().showConfirmDialog(0, T._.dialog_rly_cancel());
@@ -164,7 +153,7 @@ public class StandaloneUpdaterGui implements UpdaterListener {
         this.branchLabel.setForeground(this.frame.getBackground().darker());
         this.frame.setLayout(new MigLayout("ins 0,wrap 1", "[grow,fill]", "[grow,fill][][]"));
         this.frame.add(this.coreGUI = new UpdaterCoreGui(this.updateController));
-
+        this.flasher = new WindowFlasher(this.frame);
         if (this.updateController != null) {
             this.updateController.getEventSender().addListener(this.coreGUI);
 
@@ -182,6 +171,16 @@ public class StandaloneUpdaterGui implements UpdaterListener {
         // this.btnBar.setVisible(false);
         this.btn2.setEnabled(false);
         this.btn1.setEnabled(false);
+        if (this.updateController.getOptions().getRestartCommand() == null || this.updateController.getOptions().getRestartCommand().length() == 0) {
+            this.btn1.setVisible(true);
+        } else {
+            this.btn1.setVisible(false);
+            if (this.updateController.getOptions().getRestartCommand() != null) {
+                // we will restart after finishing anyway
+                this.btnBar.setVisible(false);
+            }
+        }
+
         this.btn2.setToolTipText(T._.please_wait_until_update_finished());
         this.btn1.setToolTipText(T._.please_wait_until_update_finished());
         StandaloneUpdaterGui.this.btn1.addActionListener(this.startAction);
@@ -205,7 +204,14 @@ public class StandaloneUpdaterGui implements UpdaterListener {
 
     @Override
     public void onStateEnter(final UpdaterState state) {
-        // TODO Auto-generated method stub
+        System.out.println("FLASH");
+        new EDTRunner() {
+
+            @Override
+            protected void runInEDT() {
+                StandaloneUpdaterGui.this.flasher.start();
+            }
+        };
 
     }
 
@@ -240,8 +246,10 @@ public class StandaloneUpdaterGui implements UpdaterListener {
                 break;
             case EXIT_REQUEST:
 
-                // TODO
-                // dispose();
+                if (!this.updateController.hasPassed(this.updateController.stateInstall)) {
+                    this.frame.dispose();
+                    System.exit(0);
+                }
                 break;
         }
 

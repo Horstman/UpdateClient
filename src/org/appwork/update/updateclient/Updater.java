@@ -292,6 +292,10 @@ public class Updater extends StateApp {
         return this.optionalsDependencies;
     }
 
+    public UpdaterOptions getOptions() {
+        return this.options;
+    }
+
     public int getProgress() {
         return this.progress;
     }
@@ -513,6 +517,7 @@ public class Updater extends StateApp {
                     try {
                         cacheData = IO.readFile(cacheFile);
                         cacheHash = Hash.getSHA256(cacheData);
+                        cacheHash = "LL";
                     } catch (final Throwable e) {
                         // nothing
                     }
@@ -572,9 +577,9 @@ public class Updater extends StateApp {
             }
 
             private boolean filterEnviroment(final UpdateFile f, final File instDir, final File tmpDir) {
-                if (Updater.this.options.isFullUpdate()) { return true; }
+                if (Updater.this.options.isFullUpdate()) { return false; }
                 final UpdateFileOptions opt = f.getOptions();
-
+                if (opt == null) { return false; }
                 if (Updater.this.options.isOsFilterEnabled()) {
                     // file is not for windows
                     if (!opt.isWindows() && CrossSystem.isWindows()) { return true; }
@@ -607,7 +612,7 @@ public class Updater extends StateApp {
             }
 
             private boolean isFileRequired(final UpdateFile next) {
-
+                if (next.getOptions() == null) { return true; }
                 for (final String re : next.getOptions().getParentIDList()) {
                     final UpdatePackage list = this.idMap.get(re);
                     if (list != null) {
@@ -659,7 +664,7 @@ public class Updater extends StateApp {
                 HashMap<File, UpdateFile> map;
                 String id;
                 for (final UpdateFile f : hashList) {
-                    id = f.getOptions().getId() == null ? f.getPath() : f.getOptions().getId();
+                    id = f.getOptions() == null || f.getOptions().getId() == null ? f.getPath() : f.getOptions().getId();
 
                     UpdatePackage idList = this.idMap.get(id);
                     if (idList == null) {
@@ -671,11 +676,11 @@ public class Updater extends StateApp {
                     if (Updater.this.isInterrupted()) { throw new InterruptedException(); }
                 }
 
-                // filter options we need several iterations here
+                // filter options
                 UpdateFile next;
                 main: for (final Iterator<UpdateFile> it = hashList.iterator(); it.hasNext();) {
                     next = it.next();
-                    if (next.getOptions().getParentIDList().size() > 0) {
+                    if (next.getOptions() != null && next.getOptions().getParentIDList().size() > 0) {
                         Updater.this.optionalsDependencies.add(next);
                         if (this.isFileRequired(next)) {
                             continue main;

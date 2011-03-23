@@ -38,6 +38,7 @@ import org.appwork.update.updateclient.http.ClientUpdateRequiredException;
 import org.appwork.update.updateclient.http.UpdateServerException;
 import org.appwork.update.updateclient.translation.T;
 import org.appwork.utils.formatter.SizeFormatter;
+import org.appwork.utils.images.IconIO;
 import org.appwork.utils.logging.Log;
 import org.appwork.utils.net.HTTPException;
 import org.appwork.utils.swing.EDTHelper;
@@ -73,7 +74,7 @@ public class UpdaterCoreGui extends JPanel implements UpdaterListener, ActionLis
 
         this.panel = new UpdaterGuiPanel(T._.getPanelTitle(updateController.getAppID()));
         this.defBarColor = this.panel.getBar().getForeground();
-        this.progressLogo = new ProgressLogo();
+        this.progressLogo = new ProgressLogo(IconIO.getImageIcon(this.getClass().getResource("resource/updaterIcon100.png")), IconIO.getImageIcon(this.getClass().getResource("resource/updaterIcon0.png")));
 
         this.lblDetailsLabel = new JLabel(T._.UpdateServer_UpdaterGui_layoutGUI_details());
         this.lblDetailsLabel.setVisible(false);
