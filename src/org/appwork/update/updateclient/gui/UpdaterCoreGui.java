@@ -156,7 +156,7 @@ public class UpdaterCoreGui extends JPanel implements UpdaterListener, ActionLis
 
         final EditorKit editorkit = this.logField.getEditorKit();
         System.out.println(this.logTimeFormat.format(new Date()) + " - " + msg);
-        final StringReader r = new StringReader("\r\n" + this.logTimeFormat.format(new Date()) + " - " + msg);
+        final StringReader r = new StringReader((doc.getLength() > 0 ? "\r\n" : "") + this.logTimeFormat.format(new Date()) + " - " + msg);
         try {
             editorkit.read(r, doc, doc.getLength());
         } catch (final Exception e1) {
@@ -276,8 +276,13 @@ public class UpdaterCoreGui extends JPanel implements UpdaterListener, ActionLis
                 } else if (state == UpdaterCoreGui.this.updateController.stateCreatePackage) {
                 } else if (state == UpdaterCoreGui.this.updateController.stateExtract) {
                 } else if (state == UpdaterCoreGui.this.updateController.stateFilter) {
+                    if (UpdaterCoreGui.this.updateController.getFilesToInstall().size() + UpdaterCoreGui.this.updateController.getUpdates().size() + UpdaterCoreGui.this.updateController.getFilesToRemove().size() == 0) {
+                        UpdaterCoreGui.this.log(T._.log_you_are_up2date());
 
-                    UpdaterCoreGui.this.log(T._.log_x_files_to_update_found(UpdaterCoreGui.this.updateController.getFilesToInstall().size() + UpdaterCoreGui.this.updateController.getUpdates().size(), UpdaterCoreGui.this.updateController.getUpdates().size(), UpdaterCoreGui.this.updateController.getFilesToRemove().size()));
+                    } else {
+                        UpdaterCoreGui.this.log(T._.log_x_files_to_update_found(UpdaterCoreGui.this.updateController.getFilesToInstall().size() + UpdaterCoreGui.this.updateController.getUpdates().size(), UpdaterCoreGui.this.updateController.getUpdates().size(), UpdaterCoreGui.this.updateController.getFilesToRemove().size()));
+
+                    }
 
                 } else if (state == UpdaterCoreGui.this.updateController.stateInstall) {
                 } else if (state == UpdaterCoreGui.this.updateController.stateError) {
