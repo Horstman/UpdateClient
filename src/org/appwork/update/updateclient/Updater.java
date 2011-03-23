@@ -719,6 +719,19 @@ public class Updater extends StateApp {
 
                 }
                 // remove all files that are already up2date
+                Updater.this.installLog = new InstallLogList();
+                final File logFile = Updater.this.getInstallLogFile();
+                map = new HashMap<File, UpdateFile>();
+                if (logFile.exists()) {
+                    Updater.this.installLog = JSonStorage.restoreFrom(logFile, Updater.this.installLog);
+
+                    for (final UpdateFile f : hashList) {
+                        lf = new File(installDir, f.getPath());
+                        map.put(lf, f);
+
+                        if (Updater.this.isInterrupted()) { throw new InterruptedException(); }
+                    }
+                }
 
                 i = 0;
                 int total = list.size();
@@ -736,51 +749,61 @@ public class Updater extends StateApp {
 
                         } else {
                             it.remove();
+
+                            // check installlog. this file is in hashlist AND
+                            // hash is ok. it should be in installog. if not,
+                            // installog my be corrcupt
+                            if (!map.containsKey(lc)) {
+                                Updater.this.installLog.add(new InstalledFile(next.getPath(), lc.lastModified()));
+                                Updater.this.installLog.setChanged(true);
+                            }
                         }
                     }
                     i++;
                     Updater.this.eventSender.fireEvent(new UpdaterEvent(Updater.this, UpdaterEvent.Types.PROGRESS_FILTER, 40 + (int) (0.4 * Math.min(100, (i * 100 / total)))));
                     // Thread.sleep(10);
                 }
+                if (Updater.this.installLog.isChanged()) {
+                    Updater.this.installLog.setChanged(false);
+                    JSonStorage.saveTo(Updater.this.getInstallLogFile(), Updater.this.installLog);
+                }
+                // restore installLog
 
                 // find files to remove
                 Updater.this.filesToRemove = new ArrayList<InstalledFile>();
-                Updater.this.installLog = new InstallLogList();
+
                 final File instRoot = Updater.this.getInstallDirectory();
-                final File logFile = Updater.this.getInstallLogFile();
-                if (logFile.exists()) {
-                    Updater.this.installLog = JSonStorage.restoreFrom(logFile, Updater.this.installLog);
-                    map = new HashMap<File, UpdateFile>();
-                    for (final UpdateFile f : hashList) {
-                        lf = new File(installDir, f.getPath());
-                        map.put(lf, f);
 
-                        if (Updater.this.isInterrupted()) { throw new InterruptedException(); }
-                    }
-                    // fileMap contains localfile ->UpdateFile Mappings
+                map = new HashMap<File, UpdateFile>();
+                for (final UpdateFile f : hashList) {
+                    lf = new File(installDir, f.getPath());
+                    map.put(lf, f);
 
-                    InstalledFile ifile;
-                    i = 0;
-                    total = Updater.this.installLog.size();
-                    for (final Iterator<InstalledFile> it = Updater.this.installLog.iterator(); it.hasNext();) {
-                        i++;
-                        if (Updater.this.isInterrupted()) { throw new InterruptedException(); }
-                        ifile = it.next();
-                        final File localFile = new File(instRoot, ifile.getRelPath());
-                        if (!map.containsKey(localFile)) {
-                            // file has been installed someday, but is not in
-                            // filellist any
-                            // more
+                    if (Updater.this.isInterrupted()) { throw new InterruptedException(); }
+                }
+                // fileMap contains localfile ->UpdateFile Mappings
 
-                            if (localFile.exists()) {
-                                Updater.this.filesToRemove.add(ifile);
-                            }
+                InstalledFile ifile;
+                i = 0;
+                total = Updater.this.installLog.size();
+                for (final Iterator<InstalledFile> it = Updater.this.installLog.iterator(); it.hasNext();) {
+                    i++;
+                    if (Updater.this.isInterrupted()) { throw new InterruptedException(); }
+                    ifile = it.next();
+                    final File localFile = new File(instRoot, ifile.getRelPath());
+                    if (!map.containsKey(localFile)) {
+                        // file has been installed someday, but is not in
+                        // filellist any
+                        // more
+
+                        if (localFile.exists()) {
+                            Updater.this.filesToRemove.add(ifile);
                         }
-                        Updater.this.eventSender.fireEvent(new UpdaterEvent(Updater.this, UpdaterEvent.Types.PROGRESS_FILTER, 80 + (int) (0.2 * Math.min(100, (i * 100 / total)))));
-
                     }
+                    Updater.this.eventSender.fireEvent(new UpdaterEvent(Updater.this, UpdaterEvent.Types.PROGRESS_FILTER, 80 + (int) (0.2 * Math.min(100, (i * 100 / total)))));
 
                 }
+
                 Updater.this.updates = list;
                 final ArrayList<File> waitingForInstall = Updater.this.getFilesToInstall();
                 if (Updater.this.updates.size() == 0 && waitingForInstall.size() == 0 && Updater.this.filesToRemove.size() == 0) {
@@ -1261,7 +1284,7 @@ public class Updater extends StateApp {
                 // fileMap contains localfile ->UpdateFile Mappings
 
                 InstalledFile ifile;
-                boolean changed = false;
+
                 File localFile;
                 for (int i = 0; i < Updater.this.filesToRemove.size(); i++) {
                     ifile = Updater.this.filesToRemove.get(i);
@@ -1276,12 +1299,11 @@ public class Updater extends StateApp {
                             }
                             Updater.this.eventSender.fireEvent(new UpdaterEvent(Updater.this, UpdaterEvent.Types.DELETED_FILE, ifile));
                             Updater.this.installLog.remove(ifile);
-                            changed = true;
-
+                            Updater.this.installLog.setChanged(true);
                         }
                     } else {
                         Updater.this.installLog.remove(ifile);
-                        changed = true;
+                        Updater.this.installLog.setChanged(true);
                     }
                 }
                 final HashMap<File, UpdateFile> map = new HashMap<File, UpdateFile>();
@@ -1302,13 +1324,15 @@ public class Updater extends StateApp {
                             ifile = new InstalledFile(uf.getPath(), f.lastModified());
                             Updater.this.installLog.remove(ifile);
                             Updater.this.installLog.add(ifile);
-                            changed = true;
+                            Updater.this.installLog.setChanged(true);
                         }
                     }
 
                 }
-                if (changed) {
+                if (Updater.this.installLog.isChanged()) {
+
                     JSonStorage.saveTo(Updater.this.getInstallLogFile(), Updater.this.installLog);
+                    Updater.this.installLog.setChanged(false);
                 }
                 return ret;
             }
