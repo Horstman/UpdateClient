@@ -12,7 +12,6 @@ import java.io.StringReader;
 import java.net.SocketException;
 import java.net.SocketTimeoutException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Date;
 
 import javax.swing.BorderFactory;
@@ -166,64 +165,6 @@ public class UpdaterCoreGui extends JPanel implements UpdaterListener, ActionLis
 
     }
 
-    /**
-     * call this method only if update ran successfully
-     * 
-     * @param installedFiles
-     */
-    private void onFinished(final ArrayList<File> installedFiles) {
-
-        new EDTRunner() {
-
-            @Override
-            protected void runInEDT() {
-
-                if (installedFiles != null && installedFiles.size() > 0) {
-                    UpdaterCoreGui.this.panel.getBar().setValue(100);
-                    UpdaterCoreGui.this.panel.getSubBar().setValue(100);
-
-                    UpdaterCoreGui.this.panel.getSubBar().setString(T._.UpdateServer_UpdaterGui_runInEDT_updates(installedFiles.size()));
-                    UpdaterCoreGui.this.log(T._.UpdateServer_UpdaterGui_runInEDT_updates(installedFiles.size()));
-                    UpdaterCoreGui.this.panel.getBar().setString(T._.UpdateServer_UpdaterGui_runInEDT_successfull());
-                } else {
-                    UpdaterCoreGui.this.panel.getBar().setValue(100);
-                    UpdaterCoreGui.this.panel.getSubBar().setValue(100);
-
-                    UpdaterCoreGui.this.panel.getSubBar().setString(T._.UpdateServer_UpdaterGui_runInEDT_noupdates());
-                    UpdaterCoreGui.this.panel.getBar().setString(T._.UpdateServer_UpdaterGui_runInEDT_finished());
-                    UpdaterCoreGui.this.log(T._.UpdateServer_UpdaterGui_runInEDT_finished());
-                }
-                UpdaterCoreGui.this.progressLogo.setProgress(1.0f);
-                UpdaterCoreGui.this.panel.getBar().setIndeterminate(false);
-                UpdaterCoreGui.this.panel.getSubBar().setIndeterminate(false);
-            }
-        };
-    }
-
-    private void onInterrupted() {
-        new EDTRunner() {
-
-            @Override
-            protected void runInEDT() {
-                final String message = T._.interrupted();
-
-                UpdaterCoreGui.this.log(message);
-                UpdaterCoreGui.this.panel.getSubBar().setForeground(Color.ORANGE.darker());
-                UpdaterCoreGui.this.panel.getBar().setForeground(Color.ORANGE.darker());
-                UpdaterCoreGui.this.panel.getSubBar().setValue(100);
-                UpdaterCoreGui.this.panel.getBar().setValue(100);
-                UpdaterCoreGui.this.panel.getBar().setIndeterminate(false);
-                UpdaterCoreGui.this.panel.getSubBar().setIndeterminate(false);
-                UpdaterCoreGui.this.panel.getBar().setString(T._.interrupted_title());
-                UpdaterCoreGui.this.panel.getSubBar().setString(message);
-                UpdaterCoreGui.this.getProgressLogo().setProgress(1.0f);
-                UpdaterCoreGui.this.expand();
-
-            }
-        };
-
-    }
-
     public void onServiceNotAvailable(final HTTPException e) throws InterruptedException {
 
         final String oldBar = this.panel.getSubBar().getString();
@@ -335,13 +276,9 @@ public class UpdaterCoreGui extends JPanel implements UpdaterListener, ActionLis
                 } else if (state == UpdaterCoreGui.this.updateController.stateCreatePackage) {
                 } else if (state == UpdaterCoreGui.this.updateController.stateExtract) {
                 } else if (state == UpdaterCoreGui.this.updateController.stateFilter) {
-                    final int updates = UpdaterCoreGui.this.updateController.getFilesToInstall().size() + UpdaterCoreGui.this.updateController.getUpdates().size() + UpdaterCoreGui.this.updateController.getFilesToRemove().size();
-                    if (updates == 0) {
-                        UpdaterCoreGui.this.log(T._.log_you_are_up2date());
 
-                    } else {
-                        UpdaterCoreGui.this.log(T._.log_x_files_to_update_found(updates));
-                    }
+                    UpdaterCoreGui.this.log(T._.log_x_files_to_update_found(UpdaterCoreGui.this.updateController.getFilesToInstall().size() + UpdaterCoreGui.this.updateController.getUpdates().size(), UpdaterCoreGui.this.updateController.getUpdates().size(), UpdaterCoreGui.this.updateController.getFilesToRemove().size()));
+
                 } else if (state == UpdaterCoreGui.this.updateController.stateInstall) {
                 } else if (state == UpdaterCoreGui.this.updateController.stateError) {
                     Throwable exception = UpdaterCoreGui.this.updateController.getException();

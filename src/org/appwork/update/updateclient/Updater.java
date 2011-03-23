@@ -1377,7 +1377,16 @@ public class Updater extends StateApp {
 
             @Override
             public StateAction run() throws Exception {
+                if (Updater.this.getOptions().isDebug()) {
+                    Log.L.info("Files to Install:");
+                    Log.L.info(JSonStorage.toString(Updater.this.getFilesToInstall()));
+                    Log.L.info("Files to Download:");
+                    Log.L.info(JSonStorage.toString(Updater.this.getUpdates()));
 
+                    Log.L.info("Files to Remove:");
+                    Log.L.info(JSonStorage.toString(Updater.this.getFilesToRemove()));
+
+                }
                 final ArrayList<File> filesToInstall = Updater.this.getFilesToInstall();
                 // filter files.remove all files we cannot find in hashlist
                 final HashMap<File, UpdateFile> map = new HashMap<File, UpdateFile>();
