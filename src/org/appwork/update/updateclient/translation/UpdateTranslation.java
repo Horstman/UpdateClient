@@ -187,8 +187,8 @@ public interface UpdateTranslation extends TranslateInterface {
     @Default(lngs = { "en", "de" }, values = { "Create Updatepackage", "Erstelle Updatepaket" })
     String UpdateServer_UpdaterGui_onStateChange_package();
 
-    @Default(lngs = { "en", "de" }, values = { "Successfull", "Erfolgreich" })
-    String UpdateServer_UpdaterGui_onStateChange_successfull();
+    @Default(lngs = { "en", "de" }, values = { "Successful", "Erfolgreich" })
+    String UpdateServer_UpdaterGui_onStateChange_successful();
 
     @Default(lngs = { "en", "de" }, values = { "Update %s1 | %s2-Edition", "Aktualisiere %s1 | %s2-Edition" })
     String UpdateServer_UpdaterGui_onUpdaterEvent_branch(String app, String branch);
@@ -211,8 +211,8 @@ public interface UpdateTranslation extends TranslateInterface {
     @Default(lngs = { "en", "de" }, values = { "You already have the latest version!", "Sie haben bereits die aktuellste Version" })
     String UpdateServer_UpdaterGui_runInEDT_noupdates();
 
-    @Default(lngs = { "en", "de" }, values = { "Successfull!", "Erfolgreich!" })
-    String UpdateServer_UpdaterGui_runInEDT_successfull();
+    @Default(lngs = { "en", "de" }, values = { "Successful!", "Erfolgreich!" })
+    String UpdateServer_UpdaterGui_runInEDT_successful();
 
     @Default(lngs = { "en", "de" }, values = { "Updated %s1 file(s)", "%s1 Datei(en) aktualisiert" })
     String UpdateServer_UpdaterGui_runInEDT_updates(int size);

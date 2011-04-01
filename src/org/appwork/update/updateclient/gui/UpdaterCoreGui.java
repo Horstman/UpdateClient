@@ -268,7 +268,7 @@ public class UpdaterCoreGui extends JPanel implements UpdaterListener, ActionLis
             protected void runInEDT() {
                 UpdaterCoreGui.this.panel.getSubBar().setString(null);
                 if (state == UpdaterCoreGui.this.updateController.stateDone) {
-                    UpdaterCoreGui.this.setModuleProgress(T._.UpdateServer_UpdaterGui_onStateChange_successfull(), state.getProgress());
+                    UpdaterCoreGui.this.setModuleProgress(T._.UpdateServer_UpdaterGui_onStateChange_successful(), state.getProgress());
 
                 } else if (state == UpdaterCoreGui.this.updateController.stateDownloadData) {
                 } else if (state == UpdaterCoreGui.this.updateController.stateBranchUpdate) {
