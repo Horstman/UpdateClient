@@ -32,7 +32,6 @@ import org.appwork.utils.swing.EDTRunner;
 import org.appwork.utils.swing.dialog.Dialog;
 import org.appwork.utils.swing.dialog.DialogCanceledException;
 import org.appwork.utils.swing.dialog.DialogClosedException;
-import org.appwork.utils.swing.windowflasher.WindowFlasher;
 
 public class StandaloneUpdaterGui implements UpdaterListener {
 
@@ -46,7 +45,8 @@ public class StandaloneUpdaterGui implements UpdaterListener {
     private JButton              btn2;
     private JPanel               btnBar;
     private final ActionListener startAction;
-    private WindowFlasher        flasher;
+
+    // private WindowFlasher flasher;
 
     public StandaloneUpdaterGui(final Updater updateController, final ActionListener startAction) {
 
@@ -153,7 +153,7 @@ public class StandaloneUpdaterGui implements UpdaterListener {
         this.branchLabel.setForeground(this.frame.getBackground().darker());
         this.frame.setLayout(new MigLayout("ins 0,wrap 1", "[grow,fill]", "[grow,fill][][]"));
         this.frame.add(this.coreGUI = new UpdaterCoreGui(this.updateController));
-        this.flasher = new WindowFlasher(this.frame);
+        // this.flasher = new WindowFlasher(this.frame);
         if (this.updateController != null) {
             this.updateController.getEventSender().addListener(this.coreGUI);
 
@@ -205,13 +205,13 @@ public class StandaloneUpdaterGui implements UpdaterListener {
     @Override
     public void onStateEnter(final UpdaterState state) {
         System.out.println("FLASH");
-        new EDTRunner() {
-
-            @Override
-            protected void runInEDT() {
-                StandaloneUpdaterGui.this.flasher.start();
-            }
-        };
+        // new EDTRunner() {
+        //
+        // @Override
+        // protected void runInEDT() {
+        // StandaloneUpdaterGui.this.flasher.start();
+        // }
+        // };
 
     }
 
@@ -239,18 +239,18 @@ public class StandaloneUpdaterGui implements UpdaterListener {
 
         switch (event.getType()) {
 
-            case BRANCH_UPDATED:
+        case BRANCH_UPDATED:
 
-                this.updateBranchLabel(T._.UpdateServer_UpdaterGui_onUpdaterEvent_branch(this.updateController.getAppID(), this.updateController.getBranch().getName()));
+            this.updateBranchLabel(T._.UpdateServer_UpdaterGui_onUpdaterEvent_branch(this.updateController.getAppID(), this.updateController.getBranch().getName()));
 
-                break;
-            case EXIT_REQUEST:
+            break;
+        case EXIT_REQUEST:
 
-                if (!this.updateController.hasPassed(this.updateController.stateInstall)) {
-                    this.frame.dispose();
-                    System.exit(0);
-                }
-                break;
+            if (!this.updateController.hasPassed(this.updateController.stateInstall)) {
+                this.frame.dispose();
+                System.exit(0);
+            }
+            break;
         }
 
     }
